@@ -23,7 +23,7 @@ def get_team_stats(history):
     avg_goals = sum(match["goals_for"] for match in recent) / len(recent)
     avg_conceded = sum(match["goals_against"] for match in recent) / len(recent)
     avg_shots = sum(match["shots"] for match in recent) / len(recent)
-
+    goal_difference = avg_goals - avg_conceded
     # finding streak since team with win streak 5 is stronger than
     # team with alternates between win and loss
     streak = 0
@@ -45,6 +45,7 @@ def get_team_stats(history):
         "win_rate": win_rate,
         "avg_goals": avg_goals,
         "avg_conceded": avg_conceded,
+        "goal_difference": goal_difference,
         "avg_shots": avg_shots,
         "streak": streak
     }
@@ -73,6 +74,34 @@ for _, row in df.iterrows():
     home = row["HomeTeam"]
     away = row["AwayTeam"]
 
+    if len(team_history[home]) < 5 or len(team_history[away]) < 5:
+        # Update home history
+        if row["FTR"] == "H":
+            home_result = "W"
+            away_result = "L"
+        elif row["FTR"] == "A":
+            home_result = "L"
+            away_result = "W"
+        else:
+            home_result = "D"
+            away_result = "D"
+
+        team_history[home].append({
+            "result": home_result,
+            "goals_for": row["FTHG"],
+            "goals_against": row["FTAG"],
+            "shots": row["HS"]
+        })
+
+        team_history[away].append({
+            "result": away_result,
+            "goals_for": row["FTAG"],
+            "goals_against": row["FTHG"],
+            "shots": row["AS"]
+        })
+
+        continue
+
     home_stats = get_team_stats(team_history[home])
     away_stats = get_team_stats(team_history[away])
 
@@ -83,6 +112,9 @@ for _, row in df.iterrows():
 
         "home_avg_goals": home_stats["avg_goals"],
         "away_avg_goals": away_stats["avg_goals"],
+
+        "home_goal_difference": home_stats["goal_difference"],
+        "away_goal_difference": away_stats["goal_difference"],
 
         "home_avg_conceded": home_stats["avg_conceded"],
         "away_avg_conceded": away_stats["avg_conceded"],
@@ -128,3 +160,9 @@ features_df.to_csv("../data/processed/features.csv", index=False)
 print(features_df.head())
 
 print(features_df.shape)
+
+print(features_df.head())
+
+print(features_df.describe())
+
+print(features_df.isnull().sum())
