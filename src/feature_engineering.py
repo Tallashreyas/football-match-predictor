@@ -14,7 +14,7 @@ def get_team_stats(history):
     recent = history[-5:]
 
     # choosing last 5 mathces because teams performance depends on current 
-    #play not how they played moths before
+    #play not how they played months before
     wins = sum(match["result"] == "W" for match in recent)
     win_rate = wins / len(recent)
 
@@ -24,6 +24,7 @@ def get_team_stats(history):
     avg_conceded = sum(match["goals_against"] for match in recent) / len(recent)
     avg_shots = sum(match["shots"] for match in recent) / len(recent)
     goal_difference = avg_goals - avg_conceded
+
     # finding streak since team with win streak 5 is stronger than
     # team with alternates between win and loss
     streak = 0
@@ -156,8 +157,6 @@ for _, row in df.iterrows():
 features_df = pd.DataFrame(feature_rows)
 
 features_df.to_csv("../data/processed/features.csv", index=False)
-
-print(features_df.head())
 
 print(features_df.shape)
 
