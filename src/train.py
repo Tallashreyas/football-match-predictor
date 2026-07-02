@@ -3,9 +3,10 @@ import torch.nn as nn
 
 from dataset import train_loader
 from model import FootballPredictor
+from dataset import X_train
 
 #model
-model = FootballPredictor()
+model = FootballPredictor(input_size=X_train.shape[1])
 
 #loss function
 criterion = nn.CrossEntropyLoss()

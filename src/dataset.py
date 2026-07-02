@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset,DataLoader
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import joblib
 
 #read the dataset
 df = pd.read_csv("../data/processed/features.csv")
@@ -33,16 +34,15 @@ X_train, X_test, y_train, y_test = train_test_split(
 #scaling the data
 scaler = StandardScaler()
 
-import joblib
+
+X_train = scaler.fit_transform(X_train)
+
+X_test = scaler.transform(X_test)
 
 joblib.dump(
     scaler,
     "../models/scaler.pkl"
 )
-
-X_train = scaler.fit_transform(X_train)
-
-X_test = scaler.transform(X_test)
 
 #converting into pytorch dataset
 class FootballDataset(Dataset):
@@ -76,11 +76,4 @@ test_loader = DataLoader(
 )
 
 
-features, labels = next(iter(train_loader))
 
-
-print(features.shape)
-print(labels.shape)
-
-print(features[:2])
-print(labels[:10])
