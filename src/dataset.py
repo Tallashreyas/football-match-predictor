@@ -79,3 +79,8 @@ test_loader = DataLoader(
 features, labels = next(iter(train_loader))
 
 
+print(features.shape)
+print(labels.shape)
+
+print(features[:2])
+print(labels[:10])
