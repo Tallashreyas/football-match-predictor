@@ -1,5 +1,4 @@
 import joblib
-import numpy as np
 import pandas as pd
 import torch
 
@@ -7,30 +6,42 @@ from collections import defaultdict
 
 from model import FootballPredictor
 from feature_utils import (
-    LAST_N_MATCHES,
     get_team_stats,
     get_match_result,
     add_match
 )
 
-checkpoint = torch.load("../models/football_model.pth")
+# -----------------------------
+# Load Model
+# -----------------------------
 
-model = FootballPredictor(input_size = 16)
+checkpoint = torch.load("../models/football_model.pth", map_location="cpu")
 
-model.load_state_dict(
-    checkpoint["model_state_dict"]
-)
+model = FootballPredictor(input_size=16)
+
+model.load_state_dict(checkpoint["model_state_dict"])
 
 model.eval()
 
+# -----------------------------
+# Load Scaler
+# -----------------------------
+
 scaler = joblib.load("../models/scaler.pkl")
 
+# -----------------------------
+# Load Dataset
+# -----------------------------
 
 df = pd.read_csv("../data/processed/clean_matches.csv")
 
 df["Date"] = pd.to_datetime(df["Date"])
 
 df = df.sort_values("Date").reset_index(drop=True)
+
+# -----------------------------
+# Build Team History
+# -----------------------------
 
 team_history = defaultdict(list)
 
@@ -61,93 +72,110 @@ for _, row in df.iterrows():
 
 teams = sorted(team_history.keys())
 
-print("\nAvailable Teams:\n")
+# -----------------------------
+# Prediction Function
+# -----------------------------
 
-for team in teams:
-    print(team)
+def predict_match(home_team, away_team):
 
+    if home_team not in team_history:
+        raise ValueError("Invalid Home Team")
 
-home_team = input("\nEnter Home Team: ")
+    if away_team not in team_history:
+        raise ValueError("Invalid Away Team")
 
-away_team = input("Enter Away Team: ")
+    home_stats = get_team_stats(team_history[home_team])
+    away_stats = get_team_stats(team_history[away_team])
 
+    features = [[
+        home_stats["win_rate"],
+        away_stats["win_rate"],
 
-if home_team not in team_history:
-    print("Invalid Home Team!")
-    exit()
+        home_stats["avg_goals"],
+        away_stats["avg_goals"],
 
-if away_team not in team_history:
-    print("Invalid Away Team!")
-    exit()
+        home_stats["last5_points"],
+        away_stats["last5_points"],
 
+        home_stats["home_form"],
+        away_stats["away_form"],
 
-home_stats = get_team_stats(team_history[home_team])
-away_stats = get_team_stats(team_history[away_team])
+        home_stats["goal_difference"],
+        away_stats["goal_difference"],
 
+        home_stats["avg_conceded"],
+        away_stats["avg_conceded"],
 
-features = [[
-    home_stats["win_rate"],
-    away_stats["win_rate"],
+        home_stats["avg_shots"],
+        away_stats["avg_shots"],
 
-    home_stats["avg_goals"],
-    away_stats["avg_goals"],
+        home_stats["streak"],
+        away_stats["streak"]
+    ]]
 
-    home_stats["last5_points"],
-    away_stats["last5_points"],
+    features = scaler.transform(features)
 
-    home_stats["home_form"],
-    away_stats["away_form"],
+    features = torch.tensor(
+        features,
+        dtype=torch.float32
+    )
 
-    home_stats["goal_difference"],
-    away_stats["goal_difference"],
+    with torch.no_grad():
 
-    home_stats["avg_conceded"],
-    away_stats["avg_conceded"],
+        outputs = model(features)
 
-    home_stats["avg_shots"],
-    away_stats["avg_shots"],
+        probabilities = torch.softmax(outputs, dim=1)
 
-    home_stats["streak"],
-    away_stats["streak"]
-]]
+        prediction = torch.argmax(probabilities, dim=1).item()
 
+    labels = {
+        0: "Home Win",
+        1: "Draw",
+        2: "Away Win"
+    }
 
-features = scaler.transform(features)
+    return {
 
+        "prediction": labels[prediction],
 
-features = torch.tensor(
-    features,
-    dtype=torch.float32
-)
+        "probabilities": {
 
+            "home": round(float(probabilities[0][0]) * 100, 2),
+            "draw": round(float(probabilities[0][1]) * 100, 2),
+            "away": round(float(probabilities[0][2]) * 100, 2)
 
-with torch.no_grad():
+        },
 
-    outputs = model(features)
+        "home_stats": home_stats,
 
-    probabilities = torch.softmax(outputs, dim=1)
+        "away_stats": away_stats
 
-    prediction = torch.argmax(probabilities, dim=1).item()
-
-
-labels = {
-    0: "Home Win",
-    1: "Draw",
-    2: "Away Win"
-}
-
-print("\nPrediction")
-print("----------")
-print(labels[prediction])
-
-print("\nProbabilities")
-
-print(f"Home Win : {probabilities[0][0]*100:.2f}%")
-print(f"Draw     : {probabilities[0][1]*100:.2f}%")
-print(f"Away Win : {probabilities[0][2]*100:.2f}%")
+    }
 
 
+# -----------------------------
+# Run from Terminal
+# -----------------------------
 
+if __name__ == "__main__":
 
+    print("\nAvailable Teams:\n")
 
+    for team in teams:
+        print(team)
 
+    home_team = input("\nEnter Home Team: ")
+
+    away_team = input("Enter Away Team: ")
+
+    result = predict_match(home_team, away_team)
+
+    print("\nPrediction")
+    print("----------")
+    print(result["prediction"])
+
+    print("\nProbabilities")
+
+    print(f'Home Win : {result["probabilities"]["home"]:.2f}%')
+    print(f'Draw     : {result["probabilities"]["draw"]:.2f}%')
+    print(f'Away Win : {result["probabilities"]["away"]:.2f}%')

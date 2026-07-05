@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Football Match Predictor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="logo">
+
+            ⚽ Football Predictor
+
+        </div>
+
+    </nav>
+
+    <header class="hero">
+
+        <h1>Premier League Match Predictor</h1>
+
+        <p>
+
+            Predict football match outcomes using a Deep Learning model trained
+            on historical Premier League matches.
+
+        </p>
+
+        <div class="hero-cards">
+
+            <div class="hero-card">
+
+                <h2>6</h2>
+
+                <span>Seasons</span>
+
+            </div>
+
+            <div class="hero-card">
+
+                <h2>20</h2>
+
+                <span>Teams</span>
+
+            </div>
+
+            <div class="hero-card">
+
+                <h2>16</h2>
+
+                <span>Features</span>
+
+            </div>
+
+            <div class="hero-card">
+
+                <h2>PyTorch</h2>
+
+                <span>Framework</span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <main class="container">
+
+        <section class="card predictor">
+
+            <h2>Select Teams</h2>
+
+            <div class="team-selection">
+
+                <div class="input-group">
+
+                    <label>Home Team</label>
+
+                    <select id="homeTeam"></select>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>Away Team</label>
+
+                    <select id="awayTeam"></select>
+
+                </div>
+
+            </div>
+
+            <button id="predictBtn">
+
+                Predict Match
+
+            </button>
+
+        </section>
+
+        <div class="dashboard">
+
+            <section class="card prediction-card">
+
+                <h2>Prediction</h2>
+
+                <div class="prediction-icon">
+
+                    ⚽
+
+                </div>
+
+                <h3 id="predictionResult">
+
+                    Click Predict
+
+                </h3>
+
+                <p id="predictionMessage">
+
+                    Select two teams to start prediction.
+
+                </p>
+
+                <div id="probabilities"></div>
+
+            </section>
+
+            <section class="card stats-card">
+
+                <h2>Team Comparison</h2>
+
+                <div class="stats-container">
+
+                    <div class="team-card" id="homeStats">
+
+                        <h3>Home Team</h3>
+
+                        <p>Win Rate : --</p>
+
+                        <p>Goals/Game : --</p>
+
+                        <p>Shots/Game : --</p>
+
+                        <p>Goal Difference : --</p>
+
+                    </div>
+
+                    <div class="team-card" id="awayStats">
+
+                        <h3>Away Team</h3>
+
+                        <p>Win Rate : --</p>
+
+                        <p>Goals/Game : --</p>
+
+                        <p>Shots/Game : --</p>
+
+                        <p>Goal Difference : --</p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <section class="card model-card">
+
+            <h2>Model Information</h2>
+
+            <div class="model-grid">
+
+                <div>
+
+                    <h4>Framework</h4>
+
+                    <p>PyTorch</p>
+
+                </div>
+
+                <div>
+
+                    <h4>Architecture</h4>
+
+                    <p>Feed Forward Neural Network</p>
+
+                </div>
+
+                <div>
+
+                    <h4>Input Features</h4>
+
+                    <p>16 Engineered Features</p>
+
+                </div>
+
+                <div>
+
+                    <h4>Dataset</h4>
+
+                    <p>Premier League (2020–2025)</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+
+        Football Match Predictor
+
+        <br><br>
+
+        Built using PyTorch • FastAPI • HTML • CSS • JavaScript
+
+        <br><br>
+
+        © 2026 Talla Shreyas
+
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
